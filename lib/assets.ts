@@ -1,4 +1,5 @@
 import heroPerspectivePrism from '@/src/assets/images/hero_perspective_prism_1795454370055.jpg';
+import bgPerspectiveEquilibrium from '@/src/assets/images/bg_perspective_equilibrium_1795457072095.jpg';
 import catWorkplaceHiring from '@/src/assets/images/cat_workplace_hiring_1795454370987.jpg';
 import catEducationStem from '@/src/assets/images/cat_education_stem_1795454370552.jpg';
 import catLeadershipBoardroom from '@/src/assets/images/cat_leadership_boardroom_1795454370993.jpg';
@@ -7,6 +8,7 @@ import type { StaticImageData } from 'next/image';
 import type { ScenarioCategory } from './types';
 
 export const HERO_IMAGE = heroPerspectivePrism;
+export const BACKGROUND_IMAGE = bgPerspectiveEquilibrium;
 
 export const CATEGORY_IMAGES: Record<ScenarioCategory, StaticImageData> = {
   'Workplace & hiring': catWorkplaceHiring,

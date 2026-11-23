@@ -41,7 +41,7 @@ export default function ScenarioExplorer({
             {records.length > 0 ? (
               <>
                 <span aria-hidden="true" className="text-slate-300">·</span>
-                <span className="text-slate-600 tabular-nums">
+                <span className="text-slate-700 tabular-nums">
                   {records.length}/{scenarios.length} reflected
                 </span>
               </>
@@ -51,14 +51,13 @@ export default function ScenarioExplorer({
             Choose a real-life scenario to experience
           </h2>
           <p className="text-base text-slate-600">
-            Make a blind decision first, then inspect how context and hidden framing cues shape
-            judgment across six everyday domains.
+            Click any card below to begin. Make a blind choice first, then unlock the Bias Reveal.
           </p>
         </div>
 
         {/* Interactive Category Segmented Filter */}
         <div
-          className="flex flex-wrap items-center gap-1 p-1 bg-slate-100 border border-slate-200 rounded-lg"
+          className="flex flex-wrap items-center gap-1 p-1 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg"
           role="tablist"
           aria-label="Filter scenarios by domain"
         >
@@ -69,8 +68,8 @@ export default function ScenarioExplorer({
             onClick={() => setActiveCategory('All')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeCategory === 'All'
-                ? 'bg-white text-slate-900 shadow-sm font-semibold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-slate-900 text-white font-semibold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             All Domains
@@ -86,8 +85,8 @@ export default function ScenarioExplorer({
                 onClick={() => setActiveCategory(category)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                   active
-                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-slate-900 text-white font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 {category}
@@ -97,9 +96,13 @@ export default function ScenarioExplorer({
         </div>
       </div>
 
-      {/* Featured Flagship Spotlight Card */}
+      {/* Featured Flagship Spotlight Card (Click Anywhere) */}
       {featuredScenario ? (
-        <article className="bg-white border border-slate-200 rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-stretch shadow-sm">
+        <button
+          type="button"
+          onClick={() => onSelectScenario(featuredScenario)}
+          className="w-full text-left group bg-white/95 backdrop-blur-sm border border-slate-200 hover:border-sky-700/60 hover:shadow-md rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-stretch shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
+        >
           <div className="lg:col-span-5 relative min-h-[240px] bg-slate-100 border-b lg:border-b-0 lg:border-r border-slate-200 overflow-hidden">
             {!failedImages[featuredScenario.id] ? (
               <Image
@@ -110,7 +113,7 @@ export default function ScenarioExplorer({
                 onError={() =>
                   setFailedImages((prev) => ({ ...prev, [featuredScenario.id]: true }))
                 }
-                className="object-cover lg:h-full"
+                className="object-cover lg:h-full group-hover:scale-[1.02] transition-transform duration-300"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-sky-50 p-6">
@@ -122,7 +125,7 @@ export default function ScenarioExplorer({
           <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                <span className="font-mono font-semibold text-sky-700">Featured Scenario</span>
+                <span className="font-mono font-semibold text-sky-700">Recommended First</span>
                 <span aria-hidden="true">·</span>
                 <span className="font-medium text-slate-700">{featuredScenario.category}</span>
                 <span aria-hidden="true">·</span>
@@ -140,7 +143,7 @@ export default function ScenarioExplorer({
                 ) : null}
               </div>
 
-              <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 leading-snug">
+              <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 group-hover:text-sky-800 transition-colors leading-snug">
                 {featuredScenario.title}
               </h3>
 
@@ -173,26 +176,22 @@ export default function ScenarioExplorer({
                 <span>Includes Blind Reveal & Evidence Audit</span>
               </span>
 
-              <button
-                type="button"
-                onClick={() => onSelectScenario(featuredScenario)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-sky-700 hover:bg-sky-800 rounded-lg transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
-              >
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-sky-700 group-hover:bg-sky-800 rounded-lg transition-colors whitespace-nowrap shrink-0">
                 <span>
                   {completedIds.has(featuredScenario.id)
                     ? 'Revisit Flagship Scenario'
                     : 'Enter Flagship Scenario'}
                 </span>
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+              </span>
             </div>
           </div>
-        </article>
+        </button>
       ) : null}
 
-      {/* Remaining Scenarios Grid */}
+      {/* Remaining Scenarios Grid (Click Anywhere Cards) */}
       {filteredScenarios.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center space-y-3">
+        <div className="bg-white/95 border border-slate-200 rounded-xl p-12 text-center space-y-3">
           <Compass className="w-8 h-8 text-slate-400 mx-auto" aria-hidden="true" />
           <p className="font-serif text-xl font-semibold text-slate-900">
             No scenarios in this category yet
@@ -210,11 +209,13 @@ export default function ScenarioExplorer({
             const displayIndex = showFeaturedSpotlight ? idx + 2 : idx + 1;
 
             return (
-              <article
+              <button
                 key={scenario.id}
-                className="group bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all"
+                type="button"
+                onClick={() => onSelectScenario(scenario)}
+                className="text-left group bg-white/95 backdrop-blur-sm border border-slate-200 hover:border-sky-700/60 hover:shadow-md rounded-xl overflow-hidden flex flex-col justify-between transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
               >
-                <div>
+                <div className="w-full">
                   {/* Visual Cover */}
                   <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden border-b border-slate-200">
                     {!hasFailed ? (
@@ -226,7 +227,7 @@ export default function ScenarioExplorer({
                         onError={() =>
                           setFailedImages((prev) => ({ ...prev, [scenario.id]: true }))
                         }
-                        className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-sky-50 p-6">
@@ -236,7 +237,7 @@ export default function ScenarioExplorer({
                   </div>
 
                   {/* Card Body — Clean Unboxed Metadata */}
-                  <div className="p-6 space-y-3">
+                  <div className="p-6 space-y-2.5">
                     <div className="flex items-center flex-wrap gap-2 text-xs text-slate-500">
                       <span className="font-mono font-medium text-slate-400 tabular-nums">
                         {String(displayIndex).padStart(2, '0')}.
@@ -252,18 +253,18 @@ export default function ScenarioExplorer({
                       ) : null}
                     </div>
 
-                    <h3 className="font-serif text-xl font-semibold text-slate-900 leading-snug">
+                    <h3 className="font-serif text-xl font-semibold text-slate-900 group-hover:text-sky-800 transition-colors leading-snug">
                       {scenario.title}
                     </h3>
 
-                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
                       {scenario.contextBrief}
                     </p>
                   </div>
                 </div>
 
                 {/* Card Footer */}
-                <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
+                <div className="w-full px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-slate-50/70">
                   {isCompleted ? (
                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
                       <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
@@ -275,16 +276,12 @@ export default function ScenarioExplorer({
                     </span>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => onSelectScenario(scenario)}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 hover:text-sky-800 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 rounded-sm"
-                  >
-                    <span>{isCompleted ? 'Revisit' : 'Start Scenario'}</span>
-                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                  </button>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 group-hover:text-sky-800 whitespace-nowrap shrink-0">
+                    <span>{isCompleted ? 'Revisit' : 'Start'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+                  </span>
                 </div>
-              </article>
+              </button>
             );
           })}
         </div>

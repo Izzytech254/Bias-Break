@@ -9,7 +9,6 @@ import {
   BookOpen,
   CheckCircle2,
   Eye,
-  MessageSquare,
   MessageSquareQuote,
   RefreshCw,
   Scale,
@@ -26,7 +25,6 @@ interface ScenarioSimulatorProps {
   onBack: () => void;
   onNextScenario?: () => void;
   onShareChallenge: (scenario: Scenario) => void;
-  onAskCoach?: (prompt: string) => void;
 }
 
 export default function ScenarioSimulator({
@@ -37,7 +35,6 @@ export default function ScenarioSimulator({
   onBack,
   onNextScenario,
   onShareChallenge,
-  onAskCoach,
 }: ScenarioSimulatorProps) {
   const [stage, setStage] = useState<1 | 2 | 3>(1);
   const [selectedChoice, setSelectedChoice] = useState<'A' | 'B' | null>(
@@ -57,6 +54,18 @@ export default function ScenarioSimulator({
     existingRecord?.postRevealNote ?? ''
   );
   const [swappedNames, setSwappedNames] = useState(false);
+  const [showInitialNote, setShowInitialNote] = useState(
+    Boolean(existingRecord?.initialRationaleText)
+  );
+  const [showRevealNote, setShowRevealNote] = useState(
+    Boolean(existingRecord?.postRevealNote)
+  );
+
+  const scrollToStageTop = () => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const toggleReason = (reason: string) => {
     setSelectedReasons((prev) =>
@@ -64,10 +73,16 @@ export default function ScenarioSimulator({
     );
   };
 
+  const handleStageJump = (targetStage: 1 | 2 | 3) => {
+    setStage(targetStage);
+    scrollToStageTop();
+  };
+
   const handleProceedToReveal = () => {
     if (!selectedChoice) return;
     setSwappedNames(false);
     setStage(2);
+    scrollToStageTop();
   };
 
   const handleProceedToComparison = () => {
@@ -86,6 +101,7 @@ export default function ScenarioSimulator({
     };
     onComplete(record);
     setStage(3);
+    scrollToStageTop();
   };
 
   const handleReplay = () => {
@@ -96,6 +112,9 @@ export default function ScenarioSimulator({
     setPostRevealStance(null);
     setPostRevealNote('');
     setSwappedNames(false);
+    setShowInitialNote(false);
+    setShowRevealNote(false);
+    scrollToStageTop();
   };
 
   const chosenOption = scenario.options.find((opt) => opt.id === selectedChoice);
@@ -133,26 +152,36 @@ export default function ScenarioSimulator({
         </div>
 
         {/* Connected 3-Step Track */}
-        <ol className="flex items-center gap-2 text-xs font-medium" aria-label="Simulation stage">
+        <ol className="flex items-center gap-2 text-xs font-medium flex-wrap" aria-label="Simulation stage">
           {[
-            { step: 1, label: '01. Blind Decision' },
-            { step: 2, label: '02. Bias Reveal' },
-            { step: 3, label: '03. Evidence Audit' },
+            { step: 1 as const, label: '01. Blind Decision' },
+            { step: 2 as const, label: '02. Bias Reveal' },
+            { step: 3 as const, label: '03. Evidence Audit' },
           ].map((item, idx) => {
             const isCurrent = stage === item.step;
             const isDone = stage > item.step;
             return (
               <React.Fragment key={item.step}>
-                <li
-                  className={`px-3 py-1.5 rounded-md whitespace-nowrap transition-colors ${
-                    isCurrent
-                      ? 'bg-slate-900 text-white font-semibold'
-                      : isDone
-                        ? 'bg-sky-50 text-sky-800 border border-sky-200'
-                        : 'bg-slate-100 text-slate-500'
-                  }`}
-                >
-                  {item.label}
+                <li>
+                  {isDone ? (
+                    <button
+                      type="button"
+                      onClick={() => handleStageJump(item.step)}
+                      className="px-3 py-1.5 rounded-md whitespace-nowrap transition-colors bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <span
+                      className={`inline-block px-3 py-1.5 rounded-md whitespace-nowrap transition-colors ${
+                        isCurrent
+                          ? 'bg-slate-900 text-white font-semibold'
+                          : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  )}
                 </li>
                 {idx < 2 ? (
                   <span aria-hidden="true" className="text-slate-300">
@@ -279,7 +308,7 @@ export default function ScenarioSimulator({
                   What factored most into your judgment?
                 </h3>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  Select one or more cues, or write a brief note before seeing the reveal.
+                  Optional: tap one or more quick cues below, or continue straight to the reveal.
                 </p>
               </div>
 
@@ -303,22 +332,43 @@ export default function ScenarioSimulator({
                 })}
               </div>
 
-              <div>
-                <label
-                  htmlFor="initial-rationale"
-                  className="block text-xs font-semibold text-slate-700 mb-1.5"
-                >
-                  Your rationale (optional)
-                </label>
-                <textarea
-                  id="initial-rationale"
-                  rows={2}
-                  value={rationaleText}
-                  onChange={(e) => setRationaleText(e.target.value)}
-                  placeholder="E.g. I prioritized decisive review style because the timeline is tight..."
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-sky-700 focus:outline-none"
-                />
-              </div>
+              {showInitialNote ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="initial-rationale"
+                      className="block text-xs font-semibold text-slate-700"
+                    >
+                      Your rationale (optional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowInitialNote(false)}
+                      className="text-xs font-medium text-slate-500 hover:text-slate-800"
+                    >
+                      Hide note
+                    </button>
+                  </div>
+                  <textarea
+                    id="initial-rationale"
+                    rows={2}
+                    value={rationaleText}
+                    onChange={(e) => setRationaleText(e.target.value)}
+                    placeholder="E.g. I prioritized decisive review style because the timeline is tight..."
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-sky-700 focus:outline-none"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowInitialNote(true)}
+                    className="text-xs font-medium text-sky-700 hover:text-sky-800 hover:underline"
+                  >
+                    + Add a quick note (optional)
+                  </button>
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                 <p className="text-xs text-slate-500">
@@ -484,27 +534,48 @@ export default function ScenarioSimulator({
                 </button>
               </div>
 
-              <div>
-                <label
-                  htmlFor="post-reveal-note"
-                  className="block text-xs font-semibold text-slate-700 mb-1.5"
-                >
-                  What surprised you or stood out? (optional)
-                </label>
-                <textarea
-                  id="post-reveal-note"
-                  rows={2}
-                  value={postRevealNote}
-                  onChange={(e) => setPostRevealNote(e.target.value)}
-                  placeholder="E.g. I hadn't noticed that both candidates shared the exact same performance metrics..."
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-sky-700 focus:outline-none"
-                />
-              </div>
+              {showRevealNote ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="post-reveal-note"
+                      className="block text-xs font-semibold text-slate-700"
+                    >
+                      What surprised you or stood out? (optional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowRevealNote(false)}
+                      className="text-xs font-medium text-slate-500 hover:text-slate-800"
+                    >
+                      Hide note
+                    </button>
+                  </div>
+                  <textarea
+                    id="post-reveal-note"
+                    rows={2}
+                    value={postRevealNote}
+                    onChange={(e) => setPostRevealNote(e.target.value)}
+                    placeholder="E.g. I hadn't noticed that both candidates shared the exact same performance metrics..."
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-sky-700 focus:outline-none"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowRevealNote(true)}
+                    className="text-xs font-medium text-sky-700 hover:text-sky-800 hover:underline"
+                  >
+                    + Add a quick reflection note (optional)
+                  </button>
+                </div>
+              )}
 
               <div className="flex items-center justify-between pt-2">
                 <button
                   type="button"
-                  onClick={() => setStage(1)}
+                  onClick={() => handleStageJump(1)}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900"
                 >
                   ← Back to Blind Profiles
@@ -672,27 +743,6 @@ export default function ScenarioSimulator({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 pt-2">
-                  {onAskCoach ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onAskCoach(
-                          `Help me reflect on "${scenario.title}" (${scenario.biasMechanism}). I picked ${chosenOption?.blindLabel ?? 'an option'} initially and then ${
-                            postRevealStance === 'reconsidered'
-                              ? 'reconsidered my decision'
-                              : postRevealStance === 'equal'
-                                ? 'recognized equal qualification'
-                                : 'kept my initial choice'
-                          }.`
-                        )
-                      }
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-200 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors whitespace-nowrap"
-                    >
-                      <MessageSquare className="w-4 h-4 text-sky-700" aria-hidden="true" />
-                      <span>Discuss with Coach</span>
-                    </button>
-                  ) : null}
-
                   <button
                     type="button"
                     onClick={() => onShareChallenge(scenario)}

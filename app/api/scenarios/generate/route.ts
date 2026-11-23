@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ThinkingLevel } from '@google/genai';
 import { getGeminiClient, SCENARIO_RESPONSE_SCHEMA } from '@/lib/gemini';
 import type { Scenario, ScenarioCategory } from '@/lib/types';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function toProxySafeErrorStatus(status: number): number {
+  return status === 502 || status === 503 ? 422 : status;
+}
 
 function extractErrorDetails(err: unknown): { status: number; message: string } {
   const fallback = {
@@ -89,8 +94,8 @@ Requirements:
 - Cite a real, credible peer-reviewed behavioral or social psychology study (no fabricated citations).
 - Tone must be reflective, curious, and evidence-based—never accusatory or preachy.`;
 
-    const modelOrder = ['gemini-4-hydrogen', 'gemini-4-hydrogen', 'gemini-3.1-flash-lite'];
-    const backoffMs = [0, 900, 1800];
+    const modelOrder = ['gemini-4-hydrogen', 'gemini-3.1-flash-lite'] as const;
+    const backoffMs = [0, 800];
 
     let responseText: string | undefined;
     let lastError: unknown;
@@ -99,15 +104,19 @@ Requirements:
       if (backoffMs[attempt] > 0) {
         await sleep(backoffMs[attempt]);
       }
+      const modelName = modelOrder[attempt];
       try {
         const response = await ai.models.generateContent({
-          model: modelOrder[attempt],
+          model: modelName,
           contents: prompt,
           config: {
             systemInstruction:
               'You are a behavioral science educator creating interactive perspective-shift scenarios for SDG 5 Gender Equality and evidence-based decision-making.',
             responseMimeType: 'application/json',
             responseSchema: SCENARIO_RESPONSE_SCHEMA,
+            ...(modelName === 'gemini-4-hydrogen'
+              ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } }
+              : {}),
           },
         });
         responseText = response.text?.trim();
@@ -123,11 +132,14 @@ Requirements:
     if (!responseText) {
       if (lastError) {
         const { status, message } = extractErrorDetails(lastError);
-        return NextResponse.json({ error: message }, { status });
+        return NextResponse.json(
+          { error: message, upstreamStatus: status },
+          { status: toProxySafeErrorStatus(status) }
+        );
       }
       return NextResponse.json(
         { error: 'The scenario generator returned an empty response. Please try again.' },
-        { status: 502 }
+        { status: 422 }
       );
     }
 
@@ -189,6 +201,9 @@ Requirements:
     return NextResponse.json({ scenario: generatedScenario });
   } catch (err: unknown) {
     const { status, message } = extractErrorDetails(err);
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json(
+      { error: message, upstreamStatus: status },
+      { status: toProxySafeErrorStatus(status) }
+    );
   }
 }

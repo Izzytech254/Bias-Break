@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Loader2, PlusCircle, Wand2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Loader2,
+  PlusCircle,
+  Wand2,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { SCENARIO_CATEGORIES } from '@/lib/scenarios';
 import type { Scenario, ScenarioCategory } from '@/lib/types';
 
@@ -9,12 +17,19 @@ interface ScenarioCreatorProps {
   onCreateScenario: (scenario: Scenario) => void;
 }
 
+const EXAMPLE_TOPIC_PRESETS: Array<{ label: string; category: ScenarioCategory }> = [
+  { label: 'Medical residency chief', category: 'Leadership' },
+  { label: 'AI engineering promotion', category: 'Technology' },
+  { label: 'University robotics scholarship', category: 'Education' },
+];
+
 export default function ScenarioCreator({ onCreateScenario }: ScenarioCreatorProps) {
   const [topicPrompt, setTopicPrompt] = useState('');
   const [category, setCategory] = useState<ScenarioCategory>('Workplace & hiring');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savedNotice, setSavedNotice] = useState(false);
+  const [showManualEditor, setShowManualEditor] = useState(false);
 
   // Editable Scenario Form State
   const [title, setTitle] = useState('');
@@ -84,6 +99,7 @@ export default function ScenarioCreator({ onCreateScenario }: ScenarioCreatorPro
       setAuthors(s.researchCitation.authors);
       setFinding(s.researchCitation.finding);
       setDebiasingPractice(s.debiasingPractice);
+      setShowManualEditor(true);
     } catch (err: unknown) {
       setErrorMsg(
         err instanceof Error ? err.message : 'Unable to generate scenario right now.'
@@ -254,6 +270,45 @@ export default function ScenarioCreator({ onCreateScenario }: ScenarioCreatorPro
           </div>
         </div>
 
+        {/* One-Click Example Topics */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate-500">Try a quick topic:</span>
+            {EXAMPLE_TOPIC_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  setTopicPrompt(preset.label);
+                  setCategory(preset.category);
+                  setErrorMsg(null);
+                }}
+                className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-sky-50 hover:text-sky-800 border border-slate-200 hover:border-sky-200 rounded-lg transition-colors"
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowManualEditor((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors whitespace-nowrap"
+          >
+            {showManualEditor ? (
+              <>
+                <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Hide Manual Fields</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{title ? 'Edit Draft Fields' : 'Author Manually'}</span>
+              </>
+            )}
+          </button>
+        </div>
+
         {errorMsg ? (
           <div
             role="alert"
@@ -287,7 +342,8 @@ export default function ScenarioCreator({ onCreateScenario }: ScenarioCreatorPro
         ) : null}
       </div>
 
-      {/* Editable Form */}
+      {/* Editable Form (Progressive Disclosure) */}
+      {showManualEditor ? (
       <form
         onSubmit={handlePublish}
         className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 space-y-6"
@@ -431,6 +487,7 @@ export default function ScenarioCreator({ onCreateScenario }: ScenarioCreatorPro
           </button>
         </div>
       </form>
+      ) : null}
     </section>
   );
 }

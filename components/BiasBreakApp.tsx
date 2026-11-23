@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { MotionConfig } from 'motion/react';
 import TopNav, { type NavSection } from '@/components/TopNav';
 import HeroSection from '@/components/HeroSection';
@@ -10,7 +11,7 @@ import BiasRevealLab from '@/components/BiasRevealLab';
 import InsightsDashboard from '@/components/InsightsDashboard';
 import ScenarioCreator from '@/components/ScenarioCreator';
 import ChallengeHub from '@/components/ChallengeHub';
-import ReflectionCoach from '@/components/ReflectionCoach';
+import { BACKGROUND_IMAGE } from '@/lib/assets';
 import { INITIAL_SCENARIOS } from '@/lib/scenarios';
 import type { Scenario, UserDecisionRecord } from '@/lib/types';
 
@@ -26,8 +27,6 @@ export default function BiasBreakApp() {
 
   const [customScenarios, setCustomScenarios] = useState<Scenario[]>([]);
   const [records, setRecords] = useState<UserDecisionRecord[]>([]);
-  const [isCoachOpen, setIsCoachOpen] = useState(false);
-  const [coachPendingPrompt, setCoachPendingPrompt] = useState<string | null>(null);
 
   const explorerRef = useRef<HTMLDivElement | null>(null);
 
@@ -153,15 +152,29 @@ export default function BiasBreakApp() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="relative min-h-screen flex flex-col text-slate-900">
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-optical-canvas" />
+      <div className="relative isolate min-h-screen flex flex-col text-slate-900">
+        {/* Thematic Perspective & Balance Optical Backdrop */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#F4F7FA]"
+        >
+          <Image
+            src={BACKGROUND_IMAGE}
+            alt=""
+            fill
+            priority
+            referrerPolicy="no-referrer"
+            className="object-cover object-center opacity-70"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#F4F7FA]/40 via-[#F4F7FA]/55 to-[#F4F7FA]/75" />
+        </div>
         <TopNav
           activeSection={activeSection}
           onNavigate={handleNavigate}
           completedCount={records.length}
         />
 
-        <main className="flex-1">
+        <main className="relative z-10 flex-1">
           {activeScenario ? (
             <div>
               {challengeInviter ? (
@@ -184,10 +197,6 @@ export default function BiasBreakApp() {
                 }}
                 onNextScenario={handleNextScenario}
                 onShareChallenge={handleShareChallenge}
-                onAskCoach={(prompt) => {
-                  setCoachPendingPrompt(prompt);
-                  setIsCoachOpen(true);
-                }}
               />
             </div>
           ) : (
@@ -195,7 +204,11 @@ export default function BiasBreakApp() {
               {activeSection === 'explore' ? (
                 <>
                   <HeroSection
-                    onStartExploring={handleStartExploring}
+                    onStartFlagship={() => {
+                      const first = allScenarios[0];
+                      if (first) handleOpenScenario(first, false);
+                    }}
+                    onBrowseAll={handleStartExploring}
                     onOpenRevealLab={() => handleNavigate('reveal-lab')}
                     totalScenarios={allScenarios.length}
                   />
@@ -237,7 +250,7 @@ export default function BiasBreakApp() {
         </main>
 
         {/* Quiet Editorial Footer */}
-        <footer className="border-t border-slate-200/80 bg-white/80 backdrop-blur-sm mt-16">
+        <footer className="relative z-10 border-t border-slate-200/80 bg-white/85 backdrop-blur-sm mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500">
             <div className="space-y-1">
               <p className="font-serif text-sm font-semibold text-slate-900">BiasBreak</p>
@@ -279,16 +292,6 @@ export default function BiasBreakApp() {
             </div>
           </div>
         </footer>
-
-        <ReflectionCoach
-          isOpen={isCoachOpen}
-          onToggleOpen={setIsCoachOpen}
-          activeScenario={activeScenario}
-          completedCount={records.length}
-          reconsideredCount={records.filter((r) => r.postRevealStance === 'reconsidered').length}
-          pendingPrompt={coachPendingPrompt}
-          onConsumePendingPrompt={() => setCoachPendingPrompt(null)}
-        />
       </div>
     </MotionConfig>
   );

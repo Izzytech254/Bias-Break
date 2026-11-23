@@ -2,24 +2,26 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ArrowRight, Eye, Scale, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronDown, Eye, Scale, Sparkles } from 'lucide-react';
 import { HERO_IMAGE } from '@/lib/assets';
 
 interface HeroSectionProps {
-  onStartExploring: () => void;
+  onStartFlagship: () => void;
+  onBrowseAll: () => void;
   onOpenRevealLab: () => void;
   totalScenarios: number;
 }
 
 export default function HeroSection({
-  onStartExploring,
+  onStartFlagship,
+  onBrowseAll,
   onOpenRevealLab,
   totalScenarios,
 }: HeroSectionProps) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <section className="border-b border-slate-200/80 bg-gradient-to-b from-white/85 via-white/75 to-white/45 backdrop-blur-[1px]">
+    <section className="border-b border-slate-200/80 bg-white/50 backdrop-blur-[3px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
           {/* Left Narrative Column */}
@@ -44,32 +46,41 @@ export default function HeroSection({
               </p>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={onStartExploring}
+                  onClick={onStartFlagship}
                   className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-semibold text-white bg-sky-700 hover:bg-sky-800 rounded-lg shadow-sm transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 focus-visible:ring-offset-2"
                 >
-                  <span>Explore Bias</span>
+                  <span>Start 2-Min Scenario</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </button>
 
                 <button
                   type="button"
+                  onClick={onBrowseAll}
+                  className="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 bg-white/90 hover:bg-white rounded-lg transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
+                >
+                  <span>Browse All {totalScenarios}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
+                </button>
+
+                <button
+                  type="button"
                   onClick={onOpenRevealLab}
-                  className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700"
+                  className="inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium text-sky-800 hover:text-sky-900 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 rounded-md"
                 >
                   <Eye className="w-4 h-4 text-sky-700" aria-hidden="true" />
-                  <span>Try the Blind Framing Lab</span>
+                  <span>Try Framing Flip</span>
                 </button>
               </div>
 
               {/* Quiet 3-step micro legend */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500 pt-1">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600 pt-1">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="font-mono font-semibold text-slate-900">01</span>
-                  <span>Decide blind</span>
+                  <span>Pick blind in 30 seconds</span>
                 </span>
                 <span aria-hidden="true" className="text-slate-300">·</span>
                 <span className="inline-flex items-center gap-1.5">
@@ -79,7 +90,7 @@ export default function HeroSection({
                 <span aria-hidden="true" className="text-slate-300">·</span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="font-mono font-semibold text-slate-900">03</span>
-                  <span>Compare evidence vs. assumptions</span>
+                  <span>Compare evidence vs. intuition</span>
                 </span>
               </div>
             </div>
@@ -119,13 +130,13 @@ export default function HeroSection({
         </div>
 
         {/* Full-Width 4-Column Structural Strip with hairline dividers */}
-        <div className="mt-12 pt-8 border-t border-slate-200 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-200">
+        <div className="mt-12 pt-8 border-t border-slate-200/80 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-200">
           <div className="lg:pr-6">
             <p className="font-mono text-2xl font-semibold text-slate-900 tabular-nums">
               {String(totalScenarios).padStart(2, '0')}
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">Real-Life Scenarios</p>
-            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+            <p className="mt-0.5 text-xs text-slate-600 leading-relaxed">
               Workplace, education, tech, leadership, sports & daily life
             </p>
           </div>
@@ -134,7 +145,7 @@ export default function HeroSection({
               3-Step
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">Perspective Loop</p>
-            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+            <p className="mt-0.5 text-xs text-slate-600 leading-relaxed">
               Decide blind, inspect the reveal, compare your rationale
             </p>
           </div>
@@ -143,7 +154,7 @@ export default function HeroSection({
               Zero
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">Judgmental Labels</p>
-            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+            <p className="mt-0.5 text-xs text-slate-600 leading-relaxed">
               Built to spark reflection, never to lecture or scold
             </p>
           </div>
@@ -152,7 +163,7 @@ export default function HeroSection({
               Peer-Reviewed
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">Behavioral Evidence</p>
-            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+            <p className="mt-0.5 text-xs text-slate-600 leading-relaxed">
               Grounded in Yale, Carnegie Mellon, PNAS & GitHub studies
             </p>
           </div>

@@ -2,7 +2,15 @@
 
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeftRight, CheckCircle2, Columns2, Eye, Info } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Columns2,
+  Eye,
+  Info,
+} from 'lucide-react';
 import { FRAMING_SWAP_CASES } from '@/lib/scenarios';
 
 export default function BiasRevealLab() {
@@ -12,6 +20,13 @@ export default function BiasRevealLab() {
 
   const currentCase = FRAMING_SWAP_CASES[selectedCaseIndex];
   const isMaleLens = activeLens === 'A';
+  const totalCases = FRAMING_SWAP_CASES.length;
+
+  const goToCase = (nextIndex: number) => {
+    const wrapped = (nextIndex + totalCases) % totalCases;
+    setSelectedCaseIndex(wrapped);
+    setActiveLens('A');
+  };
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -61,28 +76,51 @@ export default function BiasRevealLab() {
         </div>
       </div>
 
-      {/* Case Selector Tabs */}
-      <div className="flex flex-wrap items-center gap-2">
-        {FRAMING_SWAP_CASES.map((item, idx) => {
-          const active = idx === selectedCaseIndex;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                setSelectedCaseIndex(idx);
-                setActiveLens('A');
-              }}
-              className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 ${
-                active
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              {item.domain}
-            </button>
-          );
-        })}
+      {/* Case Selector Tabs & Quick Cycling */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {FRAMING_SWAP_CASES.map((item, idx) => {
+            const active = idx === selectedCaseIndex;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => goToCase(idx)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 ${
+                  active
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {item.domain}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+          <span className="text-xs font-mono text-slate-500 tabular-nums px-1">
+            {selectedCaseIndex + 1} / {totalCases}
+          </span>
+          <button
+            type="button"
+            onClick={() => goToCase(selectedCaseIndex - 1)}
+            aria-label="Previous framing experiment"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Prev</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => goToCase(selectedCaseIndex + 1)}
+            aria-label="Next framing experiment"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
+          >
+            <span>Next</span>
+            <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {viewMode === 'toggle' ? (

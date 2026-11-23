@@ -13,7 +13,6 @@ BiasBreak is an interactive cognitive bias and perspective-shift simulation plat
 - **Six Everyday Domains**: *Workplace & hiring*, *Education*, *Leadership*, *Technology*, *Daily life*, and *Sports*.
 - **Bias Reveal Lab**: Live interactive A/B identity lens flip and side-by-side diff across workplace reviews, venture pitches, and STEM classrooms.
 - **Personal Learning Reflection (`Insights`)**: Tracks completed scenarios, reconsidered decisions, and domain coverage without pass/fail bias labels.
-- **BiasBreak Reflection Coach**: Multi-turn Gemini chat assistant (`POST /api/chat`) grounded in behavioral science research to unpack scenarios and debiasing habits.
 - **Educator Scenario Creator & Challenge Mode**: Author custom scenarios manually or draft them from a topic via `POST /api/scenarios/generate`, and share spoiler-free friend challenge links (`?challenge=...`).
 
 ## Tech Stack
