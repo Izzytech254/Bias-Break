@@ -1,0 +1,6 @@
+{
+  "name": "BiasBreak",
+  "description": "Interactive cognitive bias and perspective-shift simulator helping people examine assumptions vs. evidence in everyday decisions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
